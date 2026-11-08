@@ -23,29 +23,71 @@
 
 ## 2. Arquitectura del Software (3 Capas)
 
+```mermaid
+flowchart TB
+    subgraph GUI["🖥️ CAPA DE PRESENTACIÓN (Presentation Layer - Tkinter / ttk)"]
+        direction LR
+        LF["LoginForm<br/>(Autenticación 'Caja' y Modal Acerca de)"]
+        AF["AffiliateForm<br/>(Captura, ttk.Treeview y Control de Acciones)"]
+        DES["DateEntrySpinbox<br/>(Selector de Fecha dd/mm/aaaa)"]
+        LF -->|Acceso Autorizado| AF
+        AF --- DES
+    end
+
+    subgraph BLL["⚙️ CAPA DE LÓGICA DE NEGOCIO (Business Logic Layer - Services)"]
+        direction LR
+        DVS["DataValidationService<br/>(Validación de Campos y Reglas)"]
+        FCS["FeeCalculatorService<br/>(Motor Tarifario Tablas 2 y 3)"]
+        RS["ReportService<br/>(Métricas por Estructura)"]
+    end
+
+    subgraph DAL["🗄️ CAPA DE DATOS EN MEMORIA (In-Memory Data Layer - Domain)"]
+        direction LR
+        MOD["Modelo: Affiliate<br/>(EstructuraDatosAfiliado)"]
+        REPO["AffiliateRepository"]
+        STK["Stack (Pila LIFO)<br/>collections.deque"]
+        QUE["Queue (Cola FIFO)<br/>collections.deque"]
+        LST["List (Lista Secuencial)<br/>list"]
+        REPO --> STK
+        REPO --> QUE
+        REPO --> LST
+    end
+
+    AF -->|Eventos y Validación| DVS
+    AF -->|Cálculo Automático| FCS
+    AF -->|Generación de Métricas| RS
+    DVS -->|Instanciación| MOD
+    AF -->|Operaciones Lineales| REPO
+    RS -->|Lectura Cero-Copia| REPO
+```
+
+### Estructura del Proyecto
+
 ```text
-+-----------------------------------------------------------------------+
-|                         PRESENTATION LAYER (GUI)                      |
-|   +--------------------------+     +-------------------------------+  |
-|   |   LoginForm (Tkinter)    |     |  AffiliateForm (ttk.Treeview) |  |
-|   +--------------------------+     +-------------------------------+  |
-+-----------------------------------||----------------------------------+
-                                    || Event Triggers / Form Control
-+-----------------------------------\/----------------------------------+
-|                    BUSINESS LOGIC LAYER (Services)                    |
-|   +--------------------------+     +-------------------------------+  |
-|   | FeeCalculatorService     |     | DataValidationService         |  |
-|   +--------------------------+     +-------------------------------+  |
-+-----------------------------------||----------------------------------+
-                                    || Object Instantiation & Calls
-+-----------------------------------\/----------------------------------+
-|                 IN-MEMORY DATA LAYER (Domain & Structures)            |
-|   +---------------------------------------------------------------+   |
-|   | Model: Affiliate                                              |   |
-|   +---------------------------------------------------------------+   |
-|   | Data Storage: Stack (deque) | Queue (deque) | List (list)     |   |
-|   +---------------------------------------------------------------+   |
-+-----------------------------------------------------------------------+
+Fase3FabioGomez/
+├── main.py                                    # Punto de entrada principal de la aplicación
+├── pyproject.toml                             # Configuración del paquete Python
+├── README.md                                  # Documentación y Tabla de Abstracción UNAD
+├── src/
+│   ├── config/
+│   │   └── constants.py                       # Constantes, tarifas y metadatos académicos
+│   ├── domain/
+│   │   ├── affiliate.py                       # Entidad inmutable Affiliate (EstructuraDatosAfiliado)
+│   │   └── data_structures.py                 # Estructuras Stack (deque), Queue (deque) y List (list)
+│   ├── services/
+│   │   ├── data_validation_service.py         # Validación defensiva de entradas y credenciales
+│   │   ├── fee_calculator_service.py          # Cálculo automático de tarifas y recargos
+│   │   └── report_service.py                  # Suma (Pila), conteo (Cola) y promedio (Lista)
+│   └── presentation/
+│       ├── app_controller.py                  # Coordinador de transición entre ventanas
+│       ├── login_form.py                      # Ventana Login - Compensándote y modal Acerca de
+│       ├── affiliate_form.py                  # Formulario principal y tabla ttk.Treeview
+│       ├── formatters.py                      # Formateo visual de moneda y filas
+│       ├── theme.py                           # Paleta de colores y estilos ttk
+│       └── widgets/
+│           └── date_entry_spinbox.py          # Control compuesto DateEntry + Spinbox (dd/mm/aaaa)
+└── tests/
+    └── test_core.py                           # Suite de pruebas unitarias, valores límite e interfaz
 ```
 
 ---
