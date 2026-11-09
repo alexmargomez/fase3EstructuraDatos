@@ -1,12 +1,26 @@
-"""Punto de entrada principal de la aplicación Caja Compensándote."""
+"""Main entry point for the Compensándote MVC application (Fase3FabioGomez)."""
 
-from src.presentation.app_controller import ApplicationController
+import tkinter as tk
+
+from controllers.affiliate_controller import AffiliateController
+from views.affiliate_view import AffiliateView
+from views.login_view import LoginView
 
 
 def main() -> None:
-    """Inicializa y ejecuta la aplicación de control de afiliados."""
-    controller = ApplicationController()
-    controller.start()
+    """Initializes the MVC components and starts the Tkinter event loop."""
+    root = tk.Tk()
+    controller = AffiliateController()
+
+    def open_affiliate_view() -> None:
+        AffiliateView(root=root, controller=controller)
+
+    LoginView(
+        root=root,
+        controller=controller,
+        on_login_success=open_affiliate_view,
+    )
+    root.mainloop()
 
 
 if __name__ == "__main__":
